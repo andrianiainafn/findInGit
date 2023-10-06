@@ -87,7 +87,10 @@ class _UsersPageState extends State<UsersPage> {
                 ],
               ),
             Expanded(
-              child: ListView.builder( controller: scrollController,itemCount: _items.length,itemBuilder: (context,index){
+              child: ListView.separated(
+                  separatorBuilder:(context,index) =>  const Divider (height: 2, color: Colors.indigo),
+                  controller: scrollController,
+                  itemCount: _items.length,itemBuilder: (context,index){
                 return ListTile(
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
