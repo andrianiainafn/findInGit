@@ -12,17 +12,31 @@ class _UsersPageState extends State<UsersPage> {
   String? _query;
   bool _isvisible= false;
   dynamic? data;
-  int currentPage =0;
+  int _currentPage =0;
   int totalPage = 0;
   int pageSize = 20;
   ScrollController scrollController = ScrollController();
-
+  List<dynamic> _items = [];
   TextEditingController queryTextEditingController = TextEditingController();
-
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    scrollController.addListener(() {
+      if(scrollController.position.pixels == scrollController.position.maxScrollExtent){
+        setState(() {
+          if(_currentPage < (totalPage - 1) ){
+            _currentPage += 1;
+            _search(_query);
+          }
+        });
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title:  Text('User $_query => $currentPage / $totalPage'),),
+      appBar: AppBar(title:  Text('User $_query => ${_currentPage}  / $totalPage'),),
       body:  Center(
         child: Column(
           children: [
@@ -63,6 +77,8 @@ class _UsersPageState extends State<UsersPage> {
                     // this._query = queryTextEditingController.text;
                     //   await _search(_query);
                     setState(() {
+                      _items = [];
+                      _currentPage = 0;
                       print(queryTextEditingController.text);
                       _query = queryTextEditingController.text;
                       _search(_query);
@@ -71,7 +87,7 @@ class _UsersPageState extends State<UsersPage> {
                 ],
               ),
             Expanded(
-              child: ListView.builder( itemCount: data == null ? 0 : data['items'].length,itemBuilder: (context,index){
+              child: ListView.builder( controller: scrollController,itemCount: _items.length,itemBuilder: (context,index){
                 return ListTile(
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,16 +95,16 @@ class _UsersPageState extends State<UsersPage> {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: NetworkImage( data['items'][index]['avatar_url'] ),
+                            backgroundImage: NetworkImage( _items[index]['avatar_url'] ),
                           ),
                           const SizedBox(width: 15),
-                          Text("${data['items'][index]['login']} "),
+                          Text("${_items[index]['login']} "),
 
                         ],
                       ),
                       CircleAvatar(
                         radius: 15,
-                        child: Text('${data['items'][index]['score']}'),
+                        child: Text('${_items[index]['score']}'),
                       )
                     ],
                   ),
@@ -102,12 +118,13 @@ class _UsersPageState extends State<UsersPage> {
   }
   //
   Future<void> _search(String? query) async {
-    Uri url = Uri.https('api.github.com', '/search/users', {'q': query, 'per_page': '$pageSize', 'page': '$currentPage'});
+    Uri url = Uri.https('api.github.com', '/search/users', {'q': query, 'per_page': '$pageSize', 'page': '$_currentPage'});
     print(url);
    var response = await http.get(url);
    print(response.body);
    setState(() {
      data =json.decode(response.body);
+     _items.addAll(data['items']);
      if(data['total_count'] % pageSize == 0 ){
       totalPage = data['total_count'] ~/ pageSize;
      }else{
