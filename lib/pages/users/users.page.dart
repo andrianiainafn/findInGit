@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:git_api/pages/repositories/repositories.page.dart';
 import 'package:http/http.dart' as http;
 
 class UsersPage extends StatefulWidget {
+  const UsersPage({super.key});
+
   @override
   State<UsersPage> createState() => _UsersPageState();
 }
@@ -11,7 +14,7 @@ class UsersPage extends StatefulWidget {
 class _UsersPageState extends State<UsersPage> {
   String? _query;
   bool _isvisible= false;
-  dynamic? data;
+  dynamic data;
   int _currentPage =0;
   int totalPage = 0;
   int pageSize = 20;
@@ -92,6 +95,9 @@ class _UsersPageState extends State<UsersPage> {
                   controller: scrollController,
                   itemCount: _items.length,itemBuilder: (context,index){
                 return ListTile(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> GitRepositoriesPage(login: _items[index]['login'],avatarUrl: _items[index]['avatar_url']) ));
+                  },
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
